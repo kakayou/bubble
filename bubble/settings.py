@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_apscheduler'
+    'django_apscheduler',
+    'spider'
 ]
 
 MIDDLEWARE = [
@@ -119,3 +120,83 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+LOG_PATH = os.path.join(BASE_DIR, 'logs')
+if not os.path.isdir(LOG_PATH):
+    os.mkdir(LOG_PATH)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'standard': {
+            'format': '[%(asctime)s] [%(levelname)s] %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'djo.log',
+            'formatter': 'standard'
+        },
+        'default': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '%s/djo.log ' % LOG_PATH,
+            'maxBytes': 1024*1024*5,
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'access_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 5 * 1024 * 1024,
+            'filename': '%s/access.log' % LOG_PATH,
+            'formatter': 'standard',
+        },
+        'run_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 5 * 1024 * 1024,
+            'filename': '%s/running.log' % LOG_PATH,
+            'formatter': 'standard',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console','file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request ': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'access': {
+            'handlers': ['access_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'run': {
+            'handlers': ['run_handler'],
+            'level': 'INFO',
+            'propagate': False
+        }
+    },
+}

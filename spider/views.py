@@ -1,17 +1,27 @@
+import logging
 from apscheduler.schedulers.background import BackgroundScheduler
+from django.http import HttpResponse
 from django_apscheduler.jobstores import DjangoJobStore, register_job
+from django.views.decorators.csrf import csrf_exempt
 
-# 实例化调度器
+log = logging.getLogger('run')
 scheduler = BackgroundScheduler()
-# 调度器使用默认的DjangoJobStore()
 scheduler.add_jobstore(DjangoJobStore(), 'default')
 
 
-# 每天8点半执行这个任务
-@register_job(scheduler, 'cron', id='test', hour=8, minute=30, args=['test'])
-def load():
-    # 具体要执行的代码
-    pass
+@register_job(scheduler, 'cron', id='test', hour=10, minute='*/1', args=['test'])
+def load(arg):
+    print(arg)
 
 
-scheduler.start()
+@csrf_exempt
+def start_job(request):
+    request_method = request.META['REQUEST_METHOD']
+    if request_method != 'POST':
+        return HttpResponse(status=500)
+    try:
+        scheduler.start()
+        return HttpResponse(status=200)
+    except Exception as e:
+        log.error('start job error: %s' % e)
+    scheduler.start()
