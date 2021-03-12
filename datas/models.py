@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 class History(models.Model):
     id = models.AutoField(primary_key=True)
+    term = models.IntegerField(default=0)
     red1 = models.CharField(max_length=20, blank=True)
     red2 = models.CharField(max_length=20, blank=True)
     red3 = models.CharField(max_length=20, blank=True)
