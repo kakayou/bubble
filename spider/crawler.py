@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from django.db.models import Max
 from lxml import etree
 from datas import models
 
@@ -47,3 +48,8 @@ def save_history(history_terms):
                 models.History.objects.bulk_create(data_list)
         except Exception as e:
             log.error("save history term error %s" % e)
+
+
+def get_last_term():
+    max_term = models.History.objects.all().aggregate(Max("term"))
+    return max_term
