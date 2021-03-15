@@ -2,7 +2,7 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from spider.crawler import latest_term, get_last_term
+from datas.views import latest_term
 
 log = logging.getLogger('run')
 scheduler = BackgroundScheduler()
@@ -10,7 +10,7 @@ scheduler = BackgroundScheduler()
 
 def load():
     start = "00001"
-    term = get_last_term()
+    term = latest_term()
     log.info("the latest term in db is %s" % term)
     # end = latest_term()
     # log.info("the latest term is %s" % end)
